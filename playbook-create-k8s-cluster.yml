@@ -209,6 +209,7 @@
 
 - name: Finishing Initialization of control-plane (master-node)
   hosts: master-node
+  # become: yes
   tasks:
   - name: Create .kube directory
     file:
@@ -233,3 +234,50 @@
 
   - name: join cluster
     shell: "cat /tmp/join_command.txt | bash"
+
+
+- name: install-cni
+  hosts: master-node
+  tasks:
+  - name: Copy Flannel manifest to master node
+    copy:
+      src: kube-flannel.yml
+      dest: /tmp/kube-flannel.yml
+      mode: '0644'
+
+  - name: Apply Flannel CNI configuration
+    command: kubectl apply -f /tmp/kube-flannel.yml
+    register: flannel_apply_result
+
+  - name: Display Flannel apply result
+    debug:
+      var: flannel_apply_result.stdout_lines
+
+  - name: Wait for Flannel pods to be ready
+    command: kubectl wait --for=condition=Ready pods -l app=flannel -n kube-flannel --timeout=300s
+    ignore_errors: yes
+
+  - name: Wait for all nodes to be ready
+    command: kubectl wait --for=condition=Ready nodes --all --timeout=300s
+    ignore_errors: yes
+
+  - name: Verify cluster status
+    command: kubectl get nodes -o wide
+    register: nodes_status
+
+  - name: Display nodes status
+    debug:
+      var: nodes_status.stdout_lines
+
+  - name: Check Flannel pods status
+    command: kubectl get pods -n kube-flannel -o wide
+    register: flannel_pods
+
+  - name: Display Flannel pods
+    debug:
+      var: flannel_pods.stdout_lines
+
+  - name: Clean up temporary Flannel manifest
+    file:
+      path: /tmp/kube-flannel.yml
+      state: absent
