@@ -2,7 +2,7 @@
 - name: Setup K8s Cluster
   hosts:
   - master-node
-  # - worker-node
+  - worker-node
   become: yes
   tasks:
   - name: Disable swap
