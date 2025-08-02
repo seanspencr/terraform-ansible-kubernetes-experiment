@@ -238,6 +238,7 @@
 
 - name: install-cni
   hosts: master-node
+  tags: install-cni
   tasks:
   - name: Copy Flannel manifest to master node
     copy:

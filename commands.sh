@@ -1,0 +1,1 @@
+ansible-playbook -i inventory playbook-create-k8s-cluster.yml --tags "install-cni"
