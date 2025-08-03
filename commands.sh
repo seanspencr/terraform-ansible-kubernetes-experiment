@@ -6,3 +6,5 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini fix-flannel-an
 
 # Run containerd fix
 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini fix-flannel-and-containerd.yml --tags "fix-containerd" -u demo --private-key=$HOME/id_rsa
+
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini initialize-metal-lb.yml -u demo --private-key=$HOME/id_rsa
