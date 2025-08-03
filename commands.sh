@@ -1,1 +1,8 @@
 ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini playbook-create-k8s-cluster.yml --tags "install-cni" -u demo --private-key=$HOME/id_rsa 
+
+
+# Run Flannel fix
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini playbook-create-k8s-cluster.yml --tags "fix-flannel" -u demo --private-key=$HOME/id_rsa
+
+# Run containerd fix
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini playbook-create-k8s-cluster.yml --tags "fix-containerd" -u demo --private-key=$HOME/id_rsa
