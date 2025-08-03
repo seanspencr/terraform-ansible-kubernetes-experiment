@@ -1,1 +1,1 @@
-ansible-playbook -i inventory playbook-create-k8s-cluster.yml --tags "install-cni"
+ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini playbook-create-k8s-cluster.yml --tags "install-cni" -u demo --private-key=$HOME/id_rsa 

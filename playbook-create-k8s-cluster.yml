@@ -4,6 +4,7 @@
   - master-node
   - worker-node
   become: yes
+  tags: setup-k8s-cluster
   tasks:
   - name: Disable swap
     command: swapoff -a
@@ -167,6 +168,7 @@
 - name: Initialization of control-plane (master-node)
   hosts: master-node
   become: yes
+  tags: master-node-init
   tasks:
   - name: Initialize Kubernetes master-node
     command: kubeadm init --pod-network-cidr=10.244.0.0/16
@@ -210,6 +212,7 @@
 - name: Finishing Initialization of control-plane (master-node)
   hosts: master-node
   # become: yes
+  tags: master-node-init
   tasks:
   - name: Create .kube directory
     file:
@@ -226,6 +229,7 @@
 - name: Configure worker-nodes to join
   hosts: worker-node
   become: yes
+  tags: join-worker-node
   tasks:
   - name: Copy join command to worker-node
     copy:
@@ -236,7 +240,7 @@
     shell: "cat /tmp/join_command.txt | bash"
 
 
-- name: install-cni
+- name: install cni
   hosts: master-node
   tags: install-cni
   tasks:
