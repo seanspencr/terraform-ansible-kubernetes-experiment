@@ -1,0 +1,42 @@
+- name: Install MetalLB Load Balancer
+  hosts: master-node
+  tags: install-metallb
+  tasks:
+  - name: Install MetalLB
+    command: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
+
+  - name: Wait for MetalLB to be ready
+    command: kubectl wait --namespace metallb-system --for=condition=ready pod --selector=app=metallb --timeout=90s
+
+  - name: Create MetalLB configuration
+    copy:
+      dest: /tmp/metallb-config.yaml
+      content: |
+        apiVersion: metallb.io/v1beta1
+        kind: IPAddressPool
+        metadata:
+          name: default-pool
+          namespace: metallb-system
+        spec:
+          addresses:
+          - 192.168.61.200-192.168.61.210
+        ---
+        apiVersion: metallb.io/v1beta1
+        kind: L2Advertisement
+        metadata:
+          name: default
+          namespace: metallb-system
+        spec:
+          ipAddressPools:
+          - default-pool
+
+  - name: Apply MetalLB configuration
+    command: kubectl apply -f /tmp/metallb-config.yaml
+
+  - name: Display MetalLB status
+    command: kubectl get pods -n metallb-system
+    register: metallb_status
+
+  - name: Show MetalLB pods
+    debug:
+      var: metallb_status.stdout_lines
