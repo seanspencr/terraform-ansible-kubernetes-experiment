@@ -31,5 +31,10 @@ variable "ci_ssh_private_key" {
 
 variable "vm_count" {
   type = number
+  default = 2
+}
+
+variable "master_count" {
+  type = number
   default = 1
 }

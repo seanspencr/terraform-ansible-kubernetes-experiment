@@ -21,10 +21,11 @@ provider "proxmox" {
 
 resource "proxmox_vm_qemu" "k8s-master" {
   name        = "k8s-master"
-  target_node = "pve"
-  vmid       = 300
-  clone      = "ubuntu-jammy2"
+  target_node = "proxmox"
+  vmid       = 500
+  clone      = "template"
   full_clone = true
+  count = var.master_count
 
   ciuser    = var.ci_user
   cipassword = var.ci_password
@@ -41,7 +42,7 @@ resource "proxmox_vm_qemu" "k8s-master" {
     ide {
       ide0 {
         cloudinit {
-          storage = "local-lvm"
+          storage = "local"
         }
       }
     }
@@ -49,7 +50,7 @@ resource "proxmox_vm_qemu" "k8s-master" {
       scsi0 {
         disk {
           size    = 20
-          storage = "local-lvm"
+          storage = "local"
         }
       }
     }
@@ -61,7 +62,7 @@ resource "proxmox_vm_qemu" "k8s-master" {
   }
 
   boot     = "order=scsi0"
-  ipconfig0 = "ip=192.168.61.169/24,gw=192.168.61.131" #gatewaynya ip proxmox
+  ipconfig0 = "ip=192.168.2.${count.index + 50}/24,gw=192.168.2.1" #gatewaynya ip proxmox
   # ipconfig0 = "ip=dhcp"
   
   lifecycle {
@@ -74,9 +75,9 @@ resource "proxmox_vm_qemu" "k8s-master" {
 resource "proxmox_vm_qemu" "k8s-workers" {
   count       = var.vm_count
   name        = "k8s-worker-${count.index + 1}"
-  target_node = "pve"
-  vmid        = 301 + count.index
-  clone       = "ubuntu-jammy2"
+  target_node = "peoxmox"
+  vmid        = 600 + count.index
+  clone       = "template"
   full_clone  = true
 
   ciuser    = var.ci_user
@@ -94,7 +95,7 @@ resource "proxmox_vm_qemu" "k8s-workers" {
     ide {
       ide0 {
         cloudinit {
-          storage = "local-lvm"
+          storage = "local"
         }
       }
     }
@@ -102,7 +103,7 @@ resource "proxmox_vm_qemu" "k8s-workers" {
       scsi0 {
         disk {
           size    = 10
-          storage = "local-lvm"
+          storage = "local"
         }
       }
     }
@@ -114,7 +115,7 @@ resource "proxmox_vm_qemu" "k8s-workers" {
   }
 
   boot     = "order=scsi0"
-  ipconfig0 = "ip=192.168.61.${count.index + 170}/24,gw=192.168.61.131"
+  ipconfig0 = "ip=192.168.3.${count.index + 50}/24,gw=192.168.3.1"
   # ipconfig0 = "ip=dhcp"
   
   lifecycle {
@@ -172,12 +173,12 @@ resource "null_resource" "testing_ansible" {
 # }
 
 
-resource "null_resource" "ansible_playbook" {
-    depends_on = [null_resource.testing_ansible]
-    provisioner "local-exec" {
-        command = "sleep 180;ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ./inventory.ini playbook-create-k8s-cluster.yml -u ${var.ci_user} --private-key=${var.ci_ssh_private_key}"
-    }
-}
+# resource "null_resource" "ansible_playbook" {
+#     depends_on = [null_resource.testing_ansible]
+#     provisioner "local-exec" {
+#         command = "sleep 180;ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ./inventory.ini playbook-create-k8s-cluster.yml -u ${var.ci_user} --private-key=${var.ci_ssh_private_key}"
+#     }
+# }
 
 
 
