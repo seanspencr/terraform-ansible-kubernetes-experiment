@@ -25,7 +25,6 @@ resource "proxmox_vm_qemu" "k8s-master" {
   vmid       = 500
   clone      = "template"
   full_clone = true
-  count = var.master_count
 
   ciuser    = var.ci_user
   cipassword = var.ci_password
@@ -62,7 +61,7 @@ resource "proxmox_vm_qemu" "k8s-master" {
   }
 
   boot     = "order=scsi0"
-  ipconfig0 = "ip=192.168.2.${count.index + 50}/24,gw=192.168.2.1" #gatewaynya ip proxmox
+  ipconfig0 = "ip=192.168.2.50/24,gw=192.168.2.1" #gatewaynya ip proxmox
   # ipconfig0 = "ip=dhcp"
   
   lifecycle {
